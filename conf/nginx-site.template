@@ -33,7 +33,9 @@ server {
 	}
 
 	location /api/ {
-		proxy_pass ${BACKEND_URI};
+		set $upstream ${BACKEND_URI};
+		proxy_pass $upstream;
+		# fastcgi_index   index.php;
 	}
 
 
