@@ -1,0 +1,12 @@
+FROM alpine:latest
+
+MAINTAINER cygmris <chrisheng86@gmail.com>
+
+ARG CN
+ENV CN=$CN
+RUN if [ $CN -eq "1" ]; then printf "using apk China Mirror..\n"; sed -i 's/dl-cdn.alpinelinux.org/mirrors.tuna.tsinghua.edu.cn/g' /etc/apk/repositories;else printf "normaly without apk mirror\n"; fi
+
+ADD /agent/elastic-apm-agent-1.15.0.jar /usr/apm/agent/elastic-apm-agent-1.15.0.jar
+# RUN sed "s#/root:/bin/ash#/root:/bin/zsh/#"  /etc/passwd
+
+CMD [ "/bin/bash" ]
