@@ -1,50 +1,56 @@
 server {
-	listen   ${NGINX_LISTEN_PORT}; ## listen for ipv4; this line is default and implied
-	listen   [::]:${NGINX_LISTEN_PORT} default ipv6only=on; ## listen for ipv6
+    listen   ${NGINX_LISTEN_PORT}; ## listen for ipv4; this line is default and implied
+    listen   [::]:${NGINX_LISTEN_PORT} default ipv6only=on; ## listen for ipv6
 
-	root /var/www/html;
-	index index.html index.htm;
+    root /var/www/html;
+    index index.html index.htm;
 
-	# Make site accessible from http://localhost/
-	server_name _;
-	
-	# Disable sendfile as per https://docs.vagrantup.com/v2/synced-folders/virtualbox.html
-	sendfile off;
+    # Make site accessible from http://localhost/
+    server_name _;
+    
+    # Disable sendfile as per https://docs.vagrantup.com/v2/synced-folders/virtualbox.html
+    sendfile off;
 
-	# Add stdout logging
-	error_log /dev/stdout info;
-	access_log /dev/stdout json_combined;
+    # Add stdout logging
+    error_log /dev/stdout info;
+    access_log /dev/stdout json_combined;
 
-	# Add option for x-forward-for (real ip when behind elb)
-	real_ip_header X-Forwarded-For;
-	set_real_ip_from ${REAL_IP_FROM};
-	set_real_ip_from 10.0.0.0/8;
-	proxy_set_header X-Real-IP $remote_addr;
-	proxy_set_header X-Real-Port $remote_port;
-	proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-	resolver ${DNS_SERVER} valid=3600s;
-	resolver_timeout 3s;
+    # Add option for x-forward-for (real ip when behind elb)
+    real_ip_header X-Forwarded-For;
+    set_real_ip_from ${REAL_IP_FROM};
+    set_real_ip_from 10.0.0.0/8;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Real-Port $remote_port;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    resolver ${DNS_SERVER} valid=3600s;
+    resolver_timeout 3s;
 
-	location / {
-		# First attempt to serve request as file, then
-		# as directory, then fall back to index.html
-		try_files $uri $uri/ @spa;
-		index  index.html index.htm;
-	}
+    location / {
+        # First attempt to serve request as file, then
+        # as directory, then fall back to index.html
+        try_files $uri $uri/ @spa;
+        index  index.html index.htm;
+    }
 
-	location @spa {
-		rewrite ^.*$ /index.html last;
-	}
+    location @spa {
+        rewrite ^.*$ /index.html last;
+    }
 
-	location /${BACKEND_PREFIX} {
-		set $upstream ${BACKEND_URI};
-		rewrite ^/${BACKEND_PREFIX}/(.*)$ /$1 break;
-		proxy_pass $upstream;
-		proxy_http_version ${PROXY_HTTP_VERSION};
-	}
+    location /${BACKEND_PREFIX} {
+        set $upstream ${BACKEND_URI};
+        rewrite ^/${BACKEND_PREFIX}/(.*)$ /$1 break;
+        proxy_pass $upstream;
+        proxy_http_version ${PROXY_HTTP_VERSION};
+    }
+
+    location /api {
+        rewrite ^/api/(.*)$ /$1 break;
+        proxy_pass http://www.baidu.com/;
+        proxy_http_version ${PROXY_HTTP_VERSION};
+    }
 
 
-	error_page 404 /404.html;
+    error_page 404 /404.html;
         location = /404.html {
                 root /var/www/errors;
                 internal;
@@ -69,14 +75,14 @@ server {
                 expires           5d;
         }
 
-	# deny access to . files, for security
-	#
-	location ~ /\. {
-    		log_not_found off; 
-    		deny all;
-	}
+    # deny access to . files, for security
+    #
+    location ~ /\. {
+            log_not_found off; 
+            deny all;
+    }
         
-	location ^~ /.well-known {
+    location ^~ /.well-known {
                 allow all;
                 auth_basic off;
         }

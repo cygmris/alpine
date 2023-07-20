@@ -24,6 +24,16 @@ server {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
 
 
+
+    location /rtmp-stat {
+            rtmp_stat all;
+            # 如果需要 JSON 风格的 stat, 不用指定 stat.xsl
+            # 但是需要指定一个新的配置项 rtmp_stat_format
+            # rtmp_stat_stylesheet stat.xsl;
+            rtmp_stat_format json;
+    }
+
+
     location /live {
         flv_live on; #open flv live streaming (subscribe)
         chunked_transfer_encoding  on; #open 'Transfer-Encoding: chunked' response

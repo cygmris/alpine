@@ -217,7 +217,8 @@ RUN echo "**** install certbot plugins ****" && \
 RUN apk add --no-cache  --virtual operational \
         vim \
         tcpdump \
-        zsh
+        zsh \
+        ffmpeg
 
 ## oh my zsh
 RUN sh -c "$(wget https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh -O -)"
@@ -269,5 +270,10 @@ EXPOSE 443 80
 ENV REAL_IP_FROM=172.16.0.0/12
 ENV NGINX_LISTEN_PORT=80
 
+# prod
+ADD conf-prod/5884/nginx-site-ssl.conf /etc/nginx/sites-available/default-ssl.conf
+ADD conf-prod/5884/nginx-supervisor.conf /etc/supervisor.conf.d/nginx.conf
+
+ 
 WORKDIR /var/www/html
 CMD ["/start.sh"]
