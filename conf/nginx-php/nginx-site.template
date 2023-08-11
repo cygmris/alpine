@@ -2,7 +2,7 @@ server {
 	listen   ${NGINX_LISTEN_PORT}; ## listen for ipv4; this line is default and implied
 	listen   [::]:${NGINX_LISTEN_PORT} default ipv6only=on; ## listen for ipv6
 
-	root /var/www/html;
+	root /var/www/html/public;
 	index index.php index.html index.htm;
 
 	# Make site accessible from http://localhost/
@@ -22,15 +22,17 @@ server {
 	proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Real-Port $remote_port;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+
 	location / {
 		# First attempt to serve request as file, then
 		# as directory, then fall back to index.html
-		try_files $uri $uri/ @spa;
-		index  index.html index.htm;
-	}
-
-	location @spa {
-		rewrite ^.*$ /index.html last;
+		try_files $uri $uri/ =404;
+        index index.php;
+        if (!-e $request_filename) {
+            rewrite  ^(.*)$  /index.php?s=/$1  last;
+            break;
+        }
 	}
 
 	location /api/ {
@@ -38,6 +40,28 @@ server {
 		proxy_pass $upstream;
 		# fastcgi_index   index.php;
 	}
+
+	location ~ \.php$ {
+        try_files $uri =404;
+		fastcgi_pass unix:/var/run/php-fpm.sock;
+		fastcgi_index  index.php;
+        fastcgi_split_path_info ^(.+\.php)(/.*)$;
+        fastcgi_param PATH_INFO $fastcgi_path_info;
+        fastcgi_buffer_size 512k;
+        fastcgi_buffers 6 512k;
+        fastcgi_busy_buffers_size 512k;
+        fastcgi_temp_file_write_size 512k;
+        include fastcgi.conf;
+	}
+
+	location ~ /pm_status$ {
+        allow 127.0.0.1;
+        #deny all;
+        fastcgi_param SCRIPT_FILENAME $fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_pass unix:/var/run/php-fpm.sock;
+    }
+
 
 
 	error_page 404 /404.html;
