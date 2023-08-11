@@ -265,7 +265,7 @@ RUN echo 'export PROMPT="%{$fg_bold[white]%}%M %{$fg_bold[red]%}➜ %{$fg_bold[g
 
 RUN mkdir -p /etc/supervisor/conf.d
 ADD conf/supervisord.conf /etc/supervisord.conf
-#COPY conf/supervisor.conf.d/*.conf /etc/supervisor/conf.d/
+COPY conf/supervisor.conf.d/*.conf /etc/supervisor/conf.d/
 
 # Copy our nginx config
 RUN rm -Rf /etc/nginx/nginx.conf
@@ -330,6 +330,12 @@ RUN chown -Rf nginx.nginx /var/www/html
 VOLUME "/var/www/html"
 
 EXPOSE 443 80
+
+ENV NGINX_LISTEN_PORT=80
+ENV BACKEND_URI=http://backend-svc
+ENV BACKEND_PREFIX=api
+ENV PROXY_HTTP_VERSION=1.1
+ENV REAL_IP_FROM=172.16.0.0/12
 
 WORKDIR /var/www/html
 CMD ["/start.sh"]
