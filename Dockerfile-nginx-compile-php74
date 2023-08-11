@@ -265,7 +265,7 @@ RUN echo 'export PROMPT="%{$fg_bold[white]%}%M %{$fg_bold[red]%}➜ %{$fg_bold[g
 
 RUN mkdir -p /etc/supervisor/conf.d
 ADD conf/supervisord.conf /etc/supervisord.conf
-COPY conf/supervisor.conf.d/*.conf /etc/supervisor/conf.d/
+ADD conf/supervisor.conf.d/*.conf /etc/supervisor/conf.d/
 
 # Copy our nginx config
 RUN rm -Rf /etc/nginx/nginx.conf
