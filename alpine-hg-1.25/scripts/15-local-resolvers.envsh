@@ -1,0 +1,22 @@
+#!/bin/sh
+# vim:sw=2:ts=2:sts=2:et
+
+set -eu
+
+entrypoint_log() {
+    if [ -z "${NGINX_ENTRYPOINT_QUIET_LOGS:-}" ]; then
+        echo "$@"
+    fi
+}
+
+
+LC_ALL=C
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+[ "${NGINX_ENTRYPOINT_LOCAL_RESOLVERS:-}" ] || return 0
+
+NGINX_LOCAL_RESOLVERS=$(awk 'BEGIN{ORS=" "} $1=="nameserver" {print $2}' /etc/resolv.conf)
+entrypoint_log "RESOLVERS: $NGINX_LOCAL_RESOLVERS"
+
+
+export NGINX_LOCAL_RESOLVERS
