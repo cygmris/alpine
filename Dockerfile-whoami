@@ -1,0 +1,49 @@
+FROM chanyee/library:whoami
+ENV TZ=Asia/Hong_Kong
+RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
+RUN apk update
+
+RUN apk add --no-cache  --virtual operational \
+        vim \
+        tcpdump \
+        git \
+        bash \
+        zsh \
+        tmux
+
+RUN apk add --no-cache  --virtual utils \
+        wget \
+        libressl-dev \
+        libpcap-dev \
+        ca-certificates \
+        libcurl \
+        curl \
+        iperf \
+        iperf3 \
+        jq \
+        nmap \
+        bind-tools \
+        arping \
+        ngrep \
+        socat \
+        websocat \
+        tcptraceroute \
+        mtr \
+        inetutils-telnet \
+        tree
+
+        
+        
+# busybox includes: netcat netstat traceroute
+
+
+RUN apk add --no-cache  --virtual networking \
+    iptables     
+
+RUN set -e; wget -qO- https://raw.github.com/robbyrussell/oh-my-zsh/master/tools/install.sh | sh
+RUN echo 'export PROMPT="%{$fg_bold[white]%}%M %{$fg_bold[red]%}➜ %{$fg_bold[green]%}%p %{$fg[cyan]%}%c %{$fg_bold[blue]%}$(git_prompt_info)%{$fg_bold[blue]%} % %{$reset_color%}"' >> ~/.zshrc
+
+
+
+ENTRYPOINT ["/whoami"]
+EXPOSE 80

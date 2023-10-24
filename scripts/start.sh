@@ -5,7 +5,7 @@
 # 检查default.conf是否存在
 if [ ! -f "/etc/nginx/sites-enabled/default.conf" ]; then
   # 文件不存在,生成default.conf
-  envsubst '$REAL_IP_FROM $NGINX_LISTEN_PORT $BACKEND_URI' < /etc/nginx/nginx-site.template > /etc/nginx/sites-available/default.conf
+  envsubst '$REAL_IP_FROM $NGINX_LISTEN_PORT $BACKEND_URI $SITE_ROOT' < /etc/nginx/nginx-site.template > /etc/nginx/sites-available/default.conf
   ln -s /etc/nginx/sites-available/default.conf /etc/nginx/sites-enabled/default.conf
 fi 
 
